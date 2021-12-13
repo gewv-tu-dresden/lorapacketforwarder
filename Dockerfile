@@ -14,7 +14,7 @@ FROM python:3.7-slim-buster
 
 WORKDIR /opt/ttn-gateway
 
-RUN apt-get update
+RUN apt-get update && apt-get install apt-transport-https
 RUN apt-get -y install gpsd 
 RUN pip3 install certifi
 
