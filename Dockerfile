@@ -4,7 +4,7 @@ FROM debian:stretch-slim AS buildstep
 WORKDIR /opt/ttn-gateway/
 
 # downloading utils
-RUN apt-get update && apt-get install apt-transport-https
+RUN apt-get update && apt-get install -y apt-transport-https
 RUN apt-get -y install wget build-essential libc6-dev git pkg-config automake libtool autoconf
 
 COPY build.sh ./
@@ -14,7 +14,7 @@ FROM python:3.7-slim-buster
 
 WORKDIR /opt/ttn-gateway
 
-RUN apt-get update && apt-get install apt-transport-https
+RUN apt-get update && apt-get install -y apt-transport-https
 RUN apt-get -y install gpsd 
 RUN pip3 install certifi
 
