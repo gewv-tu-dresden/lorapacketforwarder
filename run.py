@@ -161,10 +161,6 @@ if os.getenv("SERVER_0_ENABLED", "true") == "true":
     gateway_conf["serv_port_up"] = int(os.getenv("SERVER_0_PORTUP", 1700))
     gateway_conf["serv_port_down"] = int(os.getenv("SERVER_0_PORTDOWN", 1700))
     gateway_conf["serv_enabled"] = True
-    if os.getenv("SERVER_0_DOWNLINK", "false") == "true":
-        gateway_conf["serv_down_enabled"] = True
-    else:
-        gateway_conf["serv_down_enabled"] = False
 
     print(
         "Target Server for Messages is: {}:{}".format(
