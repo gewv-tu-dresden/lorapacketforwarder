@@ -24,6 +24,7 @@ except RuntimeError:
         user privileges.  You can achieve this by using 'sudo'
         to run your script"""
     )
+    GPIO = None
 
 GWID_PREFIX = "FFFE"
 
@@ -60,14 +61,12 @@ if os.environ.get("GW_EUI") is None:
 else:
     my_eui = os.environ.get("GW_EUI")
 
-print(f"GW_EUI:\t${my_eui}")
-
-if os.environ.get("ACCOUNT_SERVER_DOMAIN") is None:
-    account_server_domain = "account.thethingsnetwork.org"
-else:
-    account_server_domain = os.environ.get("ACCOUNT_SERVER_DOMAIN")
+print(f"GW_EUI:\t{my_eui}")
 
 # Define default configs
+account_server_domain = os.environ.get(
+    "ACCOUNT_SERVER_DOMAIN", "account.thethingsnetwork.org"
+)
 description = os.getenv("GW_DESCRIPTION", "")
 placement = ""
 latitude = os.getenv("GW_REF_LATITUDE", 0)
@@ -182,45 +181,46 @@ with open("/opt/ttn-gateway/global_conf.json", "w") as the_file:
 
 # Endless loop to reset and restart packet forwarder
 while True:
-    # Reset the gateway board - this only works for the Raspberry Pi.
-    GPIO.setmode(GPIO.BOARD)  # hardware pin numbers, just like gpio -1
+    if GPIO is not None:
+        # Reset the gateway board - this only works for the Raspberry Pi.
+        GPIO.setmode(GPIO.BOARD)  # hardware pin numbers, just like gpio -1
 
-    if os.environ.get("GW_RESET_PIN") is not None:
-        try:
-            pin_number = int(str(os.environ.get("GW_RESET_PIN")))
-            print(
-                "[Lora Gateway]: Resetting concentrator on pin "
-                + str(os.environ.get("GW_RESET_PIN"))
-            )
-            GPIO.setup(pin_number, GPIO.OUT, initial=GPIO.LOW)
-            GPIO.output(pin_number, 0)
-            time.sleep(0.1)
-            GPIO.output(pin_number, 1)
-            time.sleep(0.1)
-            GPIO.output(pin_number, 0)
-            time.sleep(0.1)
-            GPIO.input(pin_number)
-            GPIO.cleanup(pin_number)
-            time.sleep(0.1)
-        except ValueError:
-            print(
-                "Can't interpret "
-                + str(os.environ.get("GW_RESET_PIN"))
-                + " as a valid pin number."
-            )
+        if os.environ.get("GW_RESET_PIN") is not None:
+            try:
+                pin_number = int(str(os.environ.get("GW_RESET_PIN")))
+                print(
+                    "[Lora Gateway]: Resetting concentrator on pin "
+                    + str(os.environ.get("GW_RESET_PIN"))
+                )
+                GPIO.setup(pin_number, GPIO.OUT, initial=GPIO.LOW)
+                GPIO.output(pin_number, 0)
+                time.sleep(0.1)
+                GPIO.output(pin_number, 1)
+                time.sleep(0.1)
+                GPIO.output(pin_number, 0)
+                time.sleep(0.1)
+                GPIO.input(pin_number)
+                GPIO.cleanup(pin_number)
+                time.sleep(0.1)
+            except ValueError:
+                print(
+                    "Can't interpret "
+                    + str(os.environ.get("GW_RESET_PIN"))
+                    + " as a valid pin number."
+                )
 
-    else:
-        print("[Lora Gateway]: Resetting concentrator on default pin 22.")
-        GPIO.setup(22, GPIO.OUT, initial=GPIO.LOW)
-        GPIO.output(22, 0)
-        time.sleep(0.1)
-        GPIO.output(22, 1)
-        time.sleep(0.1)
-        GPIO.output(22, 0)
-        time.sleep(0.1)
-        GPIO.input(22)
-        GPIO.cleanup(22)
-        time.sleep(0.1)
+        else:
+            print("[Lora Gateway]: Resetting concentrator on default pin 22.")
+            GPIO.setup(22, GPIO.OUT, initial=GPIO.LOW)
+            GPIO.output(22, 0)
+            time.sleep(0.1)
+            GPIO.output(22, 1)
+            time.sleep(0.1)
+            GPIO.output(22, 0)
+            time.sleep(0.1)
+            GPIO.input(22)
+            GPIO.cleanup(22)
+            time.sleep(0.1)
 
     # Start forwarder
     subprocess.call(
